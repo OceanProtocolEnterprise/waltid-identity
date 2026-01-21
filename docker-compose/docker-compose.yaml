@@ -1,6 +1,6 @@
 services:
   wallet-api:
-    image: ${IMAGE_PREFIX}waltid/wallet-api:${VERSION_TAG:-latest}
+    image: ${IMAGE_PREFIX}waltid/wallet-api:gaiax-0.1.1-OE
     profiles:
       - services
       - identity
@@ -35,7 +35,7 @@ services:
       - ./issuer-api/config:/waltid-issuer-api/config
 
   verifier-api:
-    image: ${IMAGE_PREFIX}waltid/verifier-api:${VERSION_TAG:-latest}
+    image: ${IMAGE_PREFIX}waltid/verifier-api:gaiax-0.1.1-OE
     profiles:
       - services
       - identity
@@ -69,7 +69,7 @@ services:
       PORT: $DEMO_WALLET_FRONTEND_PORT
 
   waltid-dev-wallet:
-    image: ${IMAGE_PREFIX}waltid/waltid-dev-wallet:${VERSION_TAG:-latest}
+    image: ${IMAGE_PREFIX}waltid/waltid-dev-wallet:gaiax-0.1.1-OE
     profiles:
       - apps
       - identity
