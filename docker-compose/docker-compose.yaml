@@ -35,7 +35,7 @@ services:
       - ./issuer-api/config:/waltid-issuer-api/config
 
   verifier-api:
-    image: ${IMAGE_PREFIX}waltid/verifier-api:gaiax-0.1.1-OE
+    image: ${IMAGE_PREFIX}waltid/verifier-api:gaiax-0.1.2-OE
     profiles:
       - services
       - identity
