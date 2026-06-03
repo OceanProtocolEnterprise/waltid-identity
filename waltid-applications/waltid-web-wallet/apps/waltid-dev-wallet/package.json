@@ -18,7 +18,12 @@
     "qr-scanner": "^1.4.2",
     "qrcode.vue": "^3.6.0",
     "unocss": "66.5.0",
-    "@metamask/sdk": "^0.33.0"
+    "@metamask/sdk": "^0.33.0",
+    "@dfns/lib-viem": "^0.8.21",
+    "@dfns/sdk": "^0.8.21",
+    "@dfns/sdk-browser": "^0.8.21",
+    "viem": "^2.21.0",
+    "ethers": "^6.15.0"
   },
   "devDependencies": {
     "@nuxt/content": "^2.13.4",
