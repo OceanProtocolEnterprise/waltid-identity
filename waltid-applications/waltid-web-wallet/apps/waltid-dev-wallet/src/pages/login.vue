@@ -162,7 +162,6 @@
                   </span>
             <span class="relative invisible">Connect with Signer Server</span>
                                 </button>
-                            </div>
                     </div>
 
                         <div class="relative mt-6">
