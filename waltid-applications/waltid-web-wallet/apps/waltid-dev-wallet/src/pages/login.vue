@@ -102,7 +102,7 @@
  <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
-                                    @click="connectDfns()"
+                                    @click="openDfnsModal()"
                                 >
                   <span
                       class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-blue-600 group-hover:translate-x-0 ease"
@@ -378,6 +378,45 @@
                 </div>
             </Dialog>
         </TransitionRoot>
+        <div
+  v-if="showDfnsModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <h3 class="text-lg font-semibold mb-4">
+      Connect with DFNS
+    </h3>
+
+    <label class="block mb-2 text-sm font-medium text-gray-700">
+      Email Address
+    </label>
+
+    <input
+      v-model="email"
+      type="email"
+      placeholder="name@example.com"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      @keyup.enter="submitDfnsLogin"
+    />
+
+    <div class="flex justify-end gap-3 mt-6">
+      <button
+        class="px-4 py-2 text-gray-600 border rounded-lg"
+        @click="closeDfnsModal"
+      >
+        Cancel
+      </button>
+
+      <button
+        :disabled="loadingDfns || !email"
+        class="px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50"
+        @click="submitDfnsLogin"
+      >
+        {{ loadingDfns ? 'Connecting...' : 'Continue' }}
+      </button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script lang="ts" setup>
@@ -397,8 +436,17 @@ import {storeToRefs} from "pinia";
 import {useTenant} from "@waltid-web-wallet/composables/tenants.ts";
 import {decodeJwt} from "jose";
 import {MetaMaskSDK} from "@metamask/sdk";
+import { WebAuthnSigner } from '@dfns/sdk-browser'
+import { DfnsAuthenticator, DfnsApiClient } from '@dfns/sdk'
+import { DfnsWallet } from '@dfns/lib-viem'
 
 const store = useModalStore();
+// DO NOT DELETE
+// const router = useRouter()
+
+// const dfnsToken = ref(null)
+// const dfnsAddress = ref(null)
+// const isConnecting = ref(false)
 
 const tenant = await useTenant().value;
 const bgImg = tenant?.bgImage;
@@ -419,6 +467,34 @@ const { user } = storeToRefs(userStore);
 const { status, data, signIn } = useAuth();
 
 const signInRedirectUrl = ref("/");
+
+
+const showDfnsModal = ref(false)
+const email = ref('')
+const loadingDfns = ref(false)
+
+const openDfnsModal = () => {
+  showDfnsModal.value = true
+}
+
+const closeDfnsModal = () => {
+  showDfnsModal.value = false
+}
+
+const submitDfnsLogin = async () => {
+  if (!email.value) return
+
+  loadingDfns.value = true
+
+  try {
+    await connectDfns()
+    showDfnsModal.value = false
+
+    email.value = ''
+  } finally {
+    loadingDfns.value = false
+  }
+}
 
 async function connectOidc() {
     navigateTo("/wallet-api/auth/oidc-login", { external: true });
@@ -509,25 +585,151 @@ async function openWeb3() {
     await authnzLogin(address, result.token);
 }
 
+// SSO flow
+// async function connectDfns() {
+//   const query = route.query
+
+//   // If we have callback params — complete the SSO flow
+//   if (query.token || query.authToken) {
+//     isConnecting.value = true
+//     try {
+//       const token = query.token || query.authToken
+//       console.log('DFNS token received:', token.slice(0, 30) + '...')
+
+//       dfnsToken.value = token
+
+//       const signer = new WebAuthnSigner({
+//         relyingParty: {
+//           id: 'localhost',
+//           name: 'Ocean Enterprise Marketplace',
+//         },
+//       })
+
+//       const dfnsClient = new DfnsApiClient({
+//         baseUrl: 'https://api.dfns.io',
+//         authToken: token,
+//         signer,
+//       })
+
+//       // Init wallet
+//       const walletId = 'wa-01jo3-ate1t-ejbao8tb6jtbb8vn'
+//       const dfnsWallet = await DfnsWallet.init({
+//         walletId,
+//         dfnsClient,
+//       })
+
+//       dfnsAddress.value = dfnsWallet.address
+//       console.log('DFNS wallet connected:', dfnsWallet.address)
+
+//       // Clean URL
+//       router.replace({ query: {} })
+//     } catch (err) {
+//       console.error('DFNS connection failed:', err.message)
+//     } finally {
+//       isConnecting.value = false
+//     }
+//     return
+//   }
+
+//   // No callback params — start SSO init
+//   isConnecting.value = true
+//   try {
+//     const response = await fetch('https://api.dfns.io/auth/login/sso/init', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({
+//         orgId: "or-01jo1-70lau-elvati4vg10e11ss",
+//         clientId: "dl2FIMTILvr4SzaaiJD8oYhHy7Hk0Sdyq7KeWiFG",
+//         redirectUri: "https://market-git-feat-dfns-network-switch-ocean-enterprise.vercel.app/api/dfns/complete-sso", // - need modification
+//       }),
+//     })
+
+//     const data = await response.json()
+
+//     if (!response.ok || !data.ssoRedirectUrl) {
+//       throw new Error(data.error || 'SSO init failed')
+//     }
+
+//     // Redirect to Authentik
+//     window.location.assign(data.ssoRedirectUrl)
+//   } catch (err) {
+//     console.error('SSO init failed:', err.message)
+//     isConnecting.value = false
+//   }
+// }
 
 async function connectDfns() {
-  const response = await fetch('https://api.dfns.io/auth/login/sso', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ organizationId: "or-01jo1-70lau-elvati4vg10e11ss", clientId:  }) // TBD: need to have dropdown
-    })
-    console.log("resp: ", JSON.stringify(response))
-    const data = (await response.json().catch(() => ({}))) as {
-      ssoRedirectUrl?: string
-      error?: string
-    }
+  if (!email.value) return
+  console.log(`Logging in as ${email.value}...`)
 
-    if (!response.ok || !data.ssoRedirectUrl) {
-      throw new Error(data.error || 'Failed to start Dfns SSO login.')
-    }
-    console.log("data: ", JSON.stringify(data))
-    
+  try {
+    console.log('Authenticating with Dfns via passkey...')
+
+    const webAuthnSigner = new WebAuthnSigner({
+      relyingParty: {
+        id: 'localhost',
+        name: 'Ocean Enterprise Marketplace',
+      },
+    })
+
+    const dfnsAuth = new DfnsAuthenticator({
+      baseUrl: "https://api.dfns.io",
+      signer: webAuthnSigner,
+    })
+
+    // TBD: Add passkey registration
+    // await dfnsAuth.register({
+    //   orgId: "or-01jo1-70lau-elvati4vg10e11ss",
+    //   username: email.value,
+    //   registrationCode: '0590-0669-4333-6299',
+    // })
+
+    const { token } = await dfnsAuth.login({
+      orgId: "or-01jo1-70lau-elvati4vg10e11ss",
+      username: email.value,
+    })
+    console.log(`JWT: ${token}`)
+    console.log('Authenticated via passkey')
+
+    const dfnsBrowserClient = new DfnsApiClient({
+      baseUrl: "https://api.dfns.io",
+      authToken: token,
+      signer: webAuthnSigner,
+    })
+
+    console.log('Initializing Dfns EOA wallet...')
+    const walletId = "wa-01jo3-ate1t-ejbao8tb6jtbb8vn"
+    const dfnsWallet = await DfnsWallet.init({
+      walletId,
+      dfnsClient: dfnsBrowserClient,
+    })
+    console.log(`Dfns EOA address: ${dfnsWallet.address}`)
+
+    const response = await fetch("http://localhost:7001/wallet-api/auth/account/web3/nonce", { method: "GET" });
+    const challenge = await response.text();
+
+    const signature = await dfnsWallet.signMessage({message: challenge})
+
+    console.log("Signature:", signature);
+
+
+    const verificationResponse = await fetch("http://localhost:7001/wallet-api/auth/account/web3/signed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            publicKey: dfnsWallet.address,
+            signed: signature,
+            challenge: challenge
+        })
+    });
+
+    const result = await verificationResponse.json();
+    console.log("Verification result: ", result);
+    await authnzLogin(dfnsWallet.address, result.token);
+
+  } catch (err) {
+    console.error(`Login failed: ${err.message}`)
+  }
 }
 
 definePageMeta({
