@@ -521,6 +521,13 @@ const router = useRouter()
 const store = useModalStore();
 const { $auth } = useNuxtApp();
 
+// DO NOT DELETE
+// const router = useRouter()
+
+// const dfnsToken = ref(null)
+// const dfnsAddress = ref(null)
+// const isConnecting = ref(false)
+
 const { data: tenant } = await useTenant();
 const bgImg = computed(() => tenant.value?.bgImage);
 const name = computed(() => tenant.value?.name);
