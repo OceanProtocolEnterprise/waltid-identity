@@ -97,6 +97,40 @@
                                 </button>
                             </div>
                         </div>
+                    
+
+ <div class="w-full inline-flex justify-center" style="padding-top:15px;">
+                                <button
+                                    class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
+                                    @click="connectDfns()"
+                                >
+                  <span
+                      class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-blue-600 group-hover:translate-x-0 ease"
+                  >
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                      ></path>
+                    </svg>
+                  </span>
+                                    <span
+                                        class="absolute flex items-center justify-center w-full h-full text-blue-600 transition-all duration-300 transform group-hover:translate-x-full ease"
+                                    >
+                    Connect with DFNS
+                  </span>
+                                    <span class="relative invisible">Connect with DFNS</span>
+                                </button>
+                            </div>
+                        </div>
 
                         <div class="relative mt-6">
                             <div
@@ -259,7 +293,7 @@
             :style="cardStyle"
             class="absolute bottom-3.5 right-3.5 w-10 lg:w-16 h-10 lg:h-16 overflow-hidden"
         >
-            <img class="overflow-hidden" src="/svg/walt-s.svg" />
+            <img class="overflow-hidden" src="../public/svg/walt-s.svg" />
         </div>
 
         <!--suppress PointlessBooleanExpressionJS -->
@@ -344,7 +378,6 @@
                 </div>
             </Dialog>
         </TransitionRoot>
-    </div>
 </template>
 
 <script lang="ts" setup>
@@ -474,6 +507,27 @@ async function openWeb3() {
     const result = await verificationResponse.json();
     console.log("Verification result: ", result);
     await authnzLogin(address, result.token);
+}
+
+
+async function connectDfns() {
+  const response = await fetch('https://api.dfns.io/auth/login/sso', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ organizationId: "or-01jo1-70lau-elvati4vg10e11ss", clientId:  }) // TBD: need to have dropdown
+    })
+    console.log("resp: ", JSON.stringify(response))
+    const data = (await response.json().catch(() => ({}))) as {
+      ssoRedirectUrl?: string
+      error?: string
+    }
+
+    if (!response.ok || !data.ssoRedirectUrl) {
+      throw new Error(data.error || 'Failed to start Dfns SSO login.')
+    }
+    console.log("data: ", JSON.stringify(data))
+    
 }
 
 definePageMeta({
