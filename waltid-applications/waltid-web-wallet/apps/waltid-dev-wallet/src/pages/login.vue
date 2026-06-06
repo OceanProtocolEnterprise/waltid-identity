@@ -442,7 +442,7 @@ import { DfnsWallet } from '@dfns/lib-viem'
 
 const store = useModalStore();
 // DO NOT DELETE
-// const router = useRouter()
+const router = useRouter()
 
 // const dfnsToken = ref(null)
 // const dfnsAddress = ref(null)
@@ -548,7 +548,7 @@ async function openWeb3() {
   const ethereum = MMSDK.getProvider();
     const response = await fetch("/wallet-api/auth/account/web3/nonce", { method: "GET" });
     const challenge = await response.text();
-    console.log("====Frontend DEBUG LOGS====");
+    console.debug("====Frontend DEBUG LOGS====");
     console.log("Received JWT:", challenge);
 
 
@@ -698,14 +698,46 @@ async function connectDfns() {
     })
 
     console.log('Initializing Dfns EOA wallet...')
-    const walletId = "wa-01jo3-ate1t-ejbao8tb6jtbb8vn"
+    let accounts
+    try {
+        accounts = await dfnsBrowserClient.wallets.listWallets()
+    } catch(err) {
+        console.error(`DFNS wallet retrieval failed: ${err.message}`)
+    }
+    if (accounts?.items.length === 0) {
+        console.error(`No wallets created in DFNS`)
+        router.push('/')
+    }
+    let permissions
+    try {
+        permissions = await dfnsBrowserClient.permissions.listPermissions()
+    } catch (err) {
+        console.error(`DFNS permissions retrieval failed: ${err.message}`)
+    }
+    if (accounts?.items.length === 0) {
+        console.error(`No permissions for this user in DFNS`)
+        router.push('/')
+    }
+    let isAllowed = false
+    permissions?.items.forEach((permission) => {
+        if (!permission.operations.includes("Wallets:Transactions:Create")) {
+            console.error(`Not enough permissions for signing`)
+            return
+        }
+        isAllowed = true
+    })
+    if (!isAllowed) {
+        router.push('/')
+    }
+    console.log(`User has enought priviledges to sign`)
+    const walletId = accounts?.items.filter(wallet => wallet.status === "Active")[0].id
     const dfnsWallet = await DfnsWallet.init({
       walletId,
       dfnsClient: dfnsBrowserClient,
     })
     console.log(`Dfns EOA address: ${dfnsWallet.address}`)
 
-    const response = await fetch("http://localhost:7001/wallet-api/auth/account/web3/nonce", { method: "GET" });
+    const response = await fetch("/wallet-api/auth/account/web3/nonce", { method: "GET" });
     const challenge = await response.text();
 
     const signature = await dfnsWallet.signMessage({message: challenge})
@@ -713,7 +745,7 @@ async function connectDfns() {
     console.log("Signature:", signature);
 
 
-    const verificationResponse = await fetch("http://localhost:7001/wallet-api/auth/account/web3/signed", {
+    const verificationResponse = await fetch("/wallet-api/auth/account/web3/signed", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
