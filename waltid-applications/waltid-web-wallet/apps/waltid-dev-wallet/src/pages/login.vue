@@ -417,6 +417,49 @@
     </div>
   </div>
 </div>
+<div
+  v-if="showRegistrationCodeModal"
+  class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <h3 class="text-lg font-semibold mb-4">
+      Register Passkey
+    </h3>
+
+    <p class="text-sm text-gray-500 mb-4">
+      Enter the registration code sent to your email to register a passkey for transaction signing.
+    </p>
+
+    <label class="block mb-2 text-sm font-medium text-gray-700">
+      Registration Code
+    </label>
+
+    <input
+      v-model="registrationCode"
+      type="text"
+      placeholder="0000-0000-0000-0000"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      @keyup.enter="submitRegistrationCode"
+    />
+
+    <div class="flex justify-end gap-3 mt-6">
+      <button
+        class="px-4 py-2 text-gray-600 border rounded-lg"
+        @click="cancelRegistrationCode"
+      >
+        Cancel
+      </button>
+
+      <button
+        :disabled="!registrationCode"
+        class="px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50"
+        @click="submitRegistrationCode"
+      >
+        Register
+      </button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script lang="ts" setup>
@@ -439,14 +482,10 @@ import {MetaMaskSDK} from "@metamask/sdk";
 import { WebAuthnSigner } from '@dfns/sdk-browser'
 import { DfnsAuthenticator, DfnsApiClient } from '@dfns/sdk'
 import { DfnsWallet } from '@dfns/lib-viem'
+import { useRuntimeConfig } from "nuxt/app";
 
 const store = useModalStore();
-// DO NOT DELETE
 const router = useRouter()
-
-// const dfnsToken = ref(null)
-// const dfnsAddress = ref(null)
-// const isConnecting = ref(false)
 
 const tenant = await useTenant().value;
 const bgImg = tenant?.bgImage;
@@ -472,6 +511,33 @@ const signInRedirectUrl = ref("/");
 const showDfnsModal = ref(false)
 const email = ref('')
 const loadingDfns = ref(false)
+
+const showRegistrationCodeModal = ref(false)
+const registrationCode = ref('')
+
+let registrationCodeResolve: ((value: string | null) => void) | null = null
+
+
+function promptForRegistrationCode(): Promise<string | null> {
+  return new Promise((resolve) => {
+    registrationCode.value = ''
+    registrationCodeResolve = resolve
+    showRegistrationCodeModal.value = true
+  })
+}
+
+function submitRegistrationCode() {
+  if (!registrationCode.value) return
+  showRegistrationCodeModal.value = false
+  registrationCodeResolve?.(registrationCode.value.trim())
+  registrationCodeResolve = null
+}
+
+function cancelRegistrationCode() {
+  showRegistrationCodeModal.value = false
+  registrationCodeResolve?.(null)
+  registrationCodeResolve = null
+}
 
 const openDfnsModal = () => {
   showDfnsModal.value = true
@@ -548,7 +614,7 @@ async function openWeb3() {
   const ethereum = MMSDK.getProvider();
     const response = await fetch("/wallet-api/auth/account/web3/nonce", { method: "GET" });
     const challenge = await response.text();
-    console.debug("====Frontend DEBUG LOGS====");
+    console.log("====Frontend DEBUG LOGS====");
     console.log("Received JWT:", challenge);
 
 
@@ -585,118 +651,151 @@ async function openWeb3() {
     await authnzLogin(address, result.token);
 }
 
-// SSO flow
-// async function connectDfns() {
-//   const query = route.query
+function openSsoPopup(
+  ssoUrl: string,
+  redirectUri: string
+): Promise<{ code: string; state: string }> {
+  return new Promise((resolve, reject) => {
+    const width = 500
+    const height = 600
+    const left = window.screenX + (window.innerWidth - width) / 2
+    const top = window.screenY + (window.innerHeight - height) / 2
 
-//   // If we have callback params — complete the SSO flow
-//   if (query.token || query.authToken) {
-//     isConnecting.value = true
-//     try {
-//       const token = query.token || query.authToken
-//       console.log('DFNS token received:', token.slice(0, 30) + '...')
+    const popup = window.open(
+      ssoUrl,
+      'sso-login',
+      `width=${width},height=${height},left=${left},top=${top}`
+    )
 
-//       dfnsToken.value = token
+    if (!popup) {
+      return reject(new Error('Popup blocked — please allow popups for this site'))
+    }
 
-//       const signer = new WebAuthnSigner({
-//         relyingParty: {
-//           id: 'localhost',
-//           name: 'Ocean Enterprise Marketplace',
-//         },
-//       })
+    const redirectOrigin = new URL(redirectUri).origin
+    const redirectPath = new URL(redirectUri).pathname
 
-//       const dfnsClient = new DfnsApiClient({
-//         baseUrl: 'https://api.dfns.io',
-//         authToken: token,
-//         signer,
-//       })
+    const interval = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(interval)
+        reject(new Error('SSO login was cancelled'))
+        return
+      }
 
-//       // Init wallet
-//       const walletId = 'wa-01jo3-ate1t-ejbao8tb6jtbb8vn'
-//       const dfnsWallet = await DfnsWallet.init({
-//         walletId,
-//         dfnsClient,
-//       })
+      try {
+        // Can only read location once popup redirects back to our origin
+        if (
+          popup.location.origin === redirectOrigin &&
+          popup.location.pathname === redirectPath
+        ) {
+          const params = new URL(popup.location.href).searchParams
+          const code = params.get('code')
+          const state = params.get('state')
 
-//       dfnsAddress.value = dfnsWallet.address
-//       console.log('DFNS wallet connected:', dfnsWallet.address)
+          clearInterval(interval)
+          popup.close()
 
-//       // Clean URL
-//       router.replace({ query: {} })
-//     } catch (err) {
-//       console.error('DFNS connection failed:', err.message)
-//     } finally {
-//       isConnecting.value = false
-//     }
-//     return
-//   }
-
-//   // No callback params — start SSO init
-//   isConnecting.value = true
-//   try {
-//     const response = await fetch('https://api.dfns.io/auth/login/sso/init', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({
-//         orgId: "or-01jo1-70lau-elvati4vg10e11ss",
-//         clientId: "dl2FIMTILvr4SzaaiJD8oYhHy7Hk0Sdyq7KeWiFG",
-//         redirectUri: "https://market-git-feat-dfns-network-switch-ocean-enterprise.vercel.app/api/dfns/complete-sso", // - need modification
-//       }),
-//     })
-
-//     const data = await response.json()
-
-//     if (!response.ok || !data.ssoRedirectUrl) {
-//       throw new Error(data.error || 'SSO init failed')
-//     }
-
-//     // Redirect to Authentik
-//     window.location.assign(data.ssoRedirectUrl)
-//   } catch (err) {
-//     console.error('SSO init failed:', err.message)
-//     isConnecting.value = false
-//   }
-// }
+          if (code && state) {
+            resolve({ code, state })
+          } else {
+            reject(new Error('SSO callback missing code or state'))
+          }
+        }
+      } catch {
+        // cross-origin — popup is still on Authentik, keep waiting
+      }
+    }, 300)
+  })
+}
 
 async function connectDfns() {
   if (!email.value) return
   console.log(`Logging in as ${email.value}...`)
 
-  try {
-    console.log('Authenticating with Dfns via passkey...')
+  const config = useRuntimeConfig()
 
-    const webAuthnSigner = new WebAuthnSigner({
+  const orgId = (config.public.dfnsOrgId || "or-01jo1-70lau-elvati4vg10e11ss") as string
+  const baseUrl = config.public.dfnsBaseUrl as string
+  const ssoClientId = config.public.clientId as string
+  const ssoRedirectUri = (config.public.redirectUri || "https://wallet-dev-stage.oceanenterprise.io/auth/callback") as string
+  const relyingParty = (config.public.rpId || "wallet-dev-stage.oceanenterprise.io") as string
+
+  try {
+    console.log('Initiating SSO login...')
+
+    const ssoInitRes = await fetch(`${baseUrl}/auth/login/sso/init`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orgId,
+        clientId: ssoClientId,
+        redirectUri: ssoRedirectUri,
+      }),
+    })
+
+    if (!ssoInitRes.ok) {
+      throw new Error(`SSO init failed: ${ssoInitRes.statusText}`)
+    }
+
+    const { ssoRedirectUrl } = await ssoInitRes.json()
+
+    const { code, state } = await openSsoPopup(ssoRedirectUrl, ssoRedirectUri as string)
+
+    const ssoCompleteRes = await fetch(`${baseUrl}/auth/login/sso`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, state }),
+    })
+
+    if (!ssoCompleteRes.ok) {
+      throw new Error(`SSO login failed: ${ssoCompleteRes.statusText}`)
+    }
+
+    const { token } = await ssoCompleteRes.json()
+    console.log('SSO authentication successful')
+
+    let webAuthnSigner = new WebAuthnSigner({
       relyingParty: {
-        id: 'localhost',
-        name: 'Ocean Enterprise Marketplace',
+        id: relyingParty,
+        name: "Walt.id",
       },
     })
 
-    const dfnsAuth = new DfnsAuthenticator({
-      baseUrl: "https://api.dfns.io",
-      signer: webAuthnSigner,
-    })
-
-    // TBD: Add passkey registration
-    // await dfnsAuth.register({
-    //   orgId: "or-01jo1-70lau-elvati4vg10e11ss",
-    //   username: email.value,
-    //   registrationCode: '0590-0669-4333-6299',
-    // })
-
-    const { token } = await dfnsAuth.login({
-      orgId: "or-01jo1-70lau-elvati4vg10e11ss",
-      username: email.value,
-    })
     console.log(`JWT: ${token}`)
-    console.log('Authenticated via passkey')
-
     const dfnsBrowserClient = new DfnsApiClient({
-      baseUrl: "https://api.dfns.io",
+      baseUrl,
       authToken: token,
       signer: webAuthnSigner,
     })
 
+
+    // Passkey registration mechanism
+    const userId = decodeJwt(token)["https://custom/app_metadata"].userId as string
+    const userProfile = await dfnsBrowserClient.auth.getUser({
+        userId: userId
+    })
+
+    if (!userProfile.isRegistered) {
+        console.log('No passkey found — registering for transaction signing...')
+
+      const registrationCode = await promptForRegistrationCode()
+      if (!registrationCode) {
+        console.error('Registration code required but not provided')
+        router.push('/')
+        return
+      }
+
+      const dfnsAuth = new DfnsAuthenticator({ baseUrl, signer: webAuthnSigner })
+
+      await dfnsAuth.register({
+        orgId,
+        username: email.value,
+        registrationCode,
+      })
+
+      console.log('Passkey registered successfully')
+    }
+
+    // Wallet Permissions
     console.log('Initializing Dfns EOA wallet...')
     let accounts
     try {
@@ -730,7 +829,9 @@ async function connectDfns() {
         router.push('/')
     }
     console.log(`User has enought priviledges to sign`)
-    const walletId = accounts?.items.filter(wallet => wallet.status === "Active")[0].id
+    const walletId = accounts?.items.filter(wallet => wallet.status === "Active")[0].id as string
+
+    console.log('Initializing Dfns EOA wallet...')
     const dfnsWallet = await DfnsWallet.init({
       walletId,
       dfnsClient: dfnsBrowserClient,
