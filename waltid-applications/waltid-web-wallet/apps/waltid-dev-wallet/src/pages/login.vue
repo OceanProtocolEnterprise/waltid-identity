@@ -520,13 +520,7 @@ import { useNuxtApp, useRuntimeConfig } from "nuxt/app";
 const router = useRouter()
 const store = useModalStore();
 const { $auth } = useNuxtApp();
-
-// DO NOT DELETE
 const router = useRouter()
-
-// const dfnsToken = ref(null)
-// const dfnsAddress = ref(null)
-// const isConnecting = ref(false)
 
 const { data: tenant } = await useTenant();
 const bgImg = computed(() => tenant.value?.bgImage);
@@ -669,7 +663,7 @@ async function openWeb3() {
   const ethereum = MMSDK.getProvider();
     const response = await fetch("/wallet-api/auth/account/web3/nonce", { method: "GET" });
     const challenge = await response.text();
-    console.debug("====Frontend DEBUG LOGS====");
+    console.log("====Frontend DEBUG LOGS====");
     console.log("Received JWT:", challenge);
 
 
