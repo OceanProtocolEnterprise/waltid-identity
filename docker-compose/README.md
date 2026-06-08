@@ -128,6 +128,22 @@ will start automatically:
 - wallet-api
 - and waltid-web-wallet
 
+#### Configure DFNS connection
+
+DFNS is an Account Abstraction solution which supports organizations wallet sovereignity
+and replaces Web3 wallet authentication (e.g. MetaMask).
+
+For DFNS integration within DEV wallet interface, those environment variables should
+be included in docker compose deployment:
+    - **DFNS_ORG_ID** - DFNS oprganization ID - to-be retrieved dynamically from user
+    or OE Marketplace
+    - **DFNS_BASE_URL** - DFNS Host for API requests, default "https://api.dfns.io"
+    - **DFNS_RP_ID** - Relying party to authorize passkey wallet signing,
+    it represents the application DNS
+    - **AUTHENTIK_CLIENT_ID** - DFNS is configured with SSO login using Authentik OIDC
+    provider as authentication. Client ID from Authentik must be provided.
+    - **AUTHENTIK_REDIRECT_URI** - Callback URL from Authentik must be exported.
+
 #### Start services using compose profiles
 
 `COMPOSE_PROFILES` environment variable located in the .env file allows the selection of
