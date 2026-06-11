@@ -807,27 +807,6 @@ async function connectDfns() {
         console.error(`No wallets created in DFNS`)
         router.push('/')
     }
-    let permissions
-    try {
-        permissions = await dfnsBrowserClient.permissions.listPermissions()
-    } catch (err) {
-        console.error(`DFNS permissions retrieval failed: ${err.message}`)
-    }
-    if (accounts?.items.length === 0) {
-        console.error(`No permissions for this user in DFNS`)
-        router.push('/')
-    }
-    let isAllowed = false
-    permissions?.items.forEach((permission) => {
-        if (!permission.operations.includes("Wallets:Transactions:Create")) {
-            console.error(`Not enough permissions for signing`)
-            return
-        }
-        isAllowed = true
-    })
-    if (!isAllowed) {
-        router.push('/')
-    }
     console.log(`User has enought priviledges to sign`)
     const walletId = accounts?.items.filter(wallet => wallet.status === "Active")[0].id as string
 
