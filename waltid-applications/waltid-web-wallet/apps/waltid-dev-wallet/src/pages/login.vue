@@ -97,6 +97,39 @@
                                 </button>
                             </div>
                         </div>
+                
+                <div class="w-full inline-flex justify-center" style="padding-top:15px;">
+                                <button
+                                    class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
+                                    @click="connectSignerServer()"
+                                >
+                  <span
+                      class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-blue-600 group-hover:translate-x-0 ease"
+                  >
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                      ></path>
+                    </svg>
+                  </span>
+                                    <span
+                                        class="absolute flex items-center justify-center w-full h-full text-blue-600 transition-all duration-300 transform group-hover:translate-x-full ease"
+                                    >
+                    Connect with Signer Server
+                  </span>
+                                    <span class="relative invisible">Connect with Signer Server</span>
+                                </button>
+                            </div>
+                    </div>
 
                         <div class="relative mt-6">
                             <div
@@ -259,7 +292,7 @@
             :style="cardStyle"
             class="absolute bottom-3.5 right-3.5 w-10 lg:w-16 h-10 lg:h-16 overflow-hidden"
         >
-            <img class="overflow-hidden" src="/svg/walt-s.svg" />
+            <img class="overflow-hidden" src="../public/svg/walt-s.svg" />
         </div>
 
         <!--suppress PointlessBooleanExpressionJS -->
@@ -277,7 +310,8 @@
                 >
                     <div
                         class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                    />
+                    >
+                    </div>
                 </TransitionChild>
 
                 <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -344,7 +378,6 @@
                 </div>
             </Dialog>
         </TransitionRoot>
-    </div>
 </template>
 
 <script lang="ts" setup>
@@ -366,6 +399,7 @@ import {decodeJwt} from "jose";
 import {MetaMaskSDK} from "@metamask/sdk";
 
 const store = useModalStore();
+const { $auth } = useNuxtApp();
 
 const tenant = await useTenant().value;
 const bgImg = tenant?.bgImage;
@@ -431,7 +465,9 @@ const MMSDK = new MetaMaskSDK({
   injectProvider: true
 });
 
-
+async function connectSignerServer() {
+    await $auth.signinRedirect();
+}
 
 
 async function openWeb3() {

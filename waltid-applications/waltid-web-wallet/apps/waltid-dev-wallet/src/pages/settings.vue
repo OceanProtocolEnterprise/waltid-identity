@@ -5,7 +5,7 @@
     </CenterMain>
 </template>
 
-<script>
+<script setup>
 definePageMeta({
     layout: "default-reduced-nav",
 })
