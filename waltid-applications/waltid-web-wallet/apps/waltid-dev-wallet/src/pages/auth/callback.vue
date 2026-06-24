@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
-import { useNuxtApp } from "nuxt/app";
 import { useRouter } from "vue-router";
-import { useAuth } from "../../../.nuxt/imports";
 import {useUserStore} from "@waltid-web-wallet/stores/user.ts";
 import {storeToRefs} from "pinia";
-import {decodeJwt} from 'jose';
 
 definePageMeta({
     title: "Callback login to your wallet - walt.id",
@@ -20,66 +17,35 @@ const { user } = storeToRefs(userStore);
 const signInRedirectUrl = ref("/");
 const { $auth } = useNuxtApp();
 
-console.log("CALLBACK START");
+const isExchanging = ref(false);
 onMounted(async () => {
-  console.log("MOUNTED");
+  if (isExchanging.value) return;
+  isExchanging.value = true;
   
   try {
-  const userData = await $auth.signinRedirectCallback();
-  console.log("USER DATA:", userData);
-  // TO BE FIXED ONCE signerService is set correctly
-  // const signerUrl =
-  //   decodeJwt(userData.access_token).signerService as string;
-  //   console.log("signerUrl:", signerUrl);
-  const signerUrl = "https://signerserver.demo.oceanenterprise.io:8443"
-
-  const response = await fetch("/wallet-api/auth/account/web3/nonce", { method: "GET" });
-    const challenge = await response.text();
-    console.log("====Frontend DEBUG LOGS====");
-    console.log("Received JWT:", challenge);
-
-  const signerResponse = await fetch(
-    `${signerUrl}/sign-message`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userData.access_token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: challenge,
-      }),
-    })
-
-    console.log("Signature Response with Signer Server:", JSON.stringify(signerResponse));
-    if (!signerResponse) {
-        console.error(`Signer request could not be fetched!`)
-        router.push("/");
-        return;
+  const route = useRoute();
+  const code = route.query.code as string;
+  const state = route.query.state as string;
+  if (!code || !state) {
+      await router.push("/login");
+      return;
     }
-    const json = await signerResponse.json();
-    const address = json.address;
-    const signature = json.signature;
 
+    const oidcState = await $auth.settings.stateStore!.get(state);
+    const parsedState = oidcState ? JSON.parse(oidcState as string) : null;
+    const codeVerifier = parsedState?.code_verifier ?? null;
 
-    const verificationResponse = await fetch("/wallet-api/auth/account/web3/signed", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            publicKey: address,
-            signed: signature,
-            challenge: challenge // Send the full tokenText (JWT)
-        })
-    });
+    if (!codeVerifier) {
+      console.error("No code_verifier found in OIDC state store");
+      await router.push("/login");
+      return;
+    }
 
-
-    console.log("Signing message:", {
-        challenge,
-        address,
-        messageToSign: challenge
-    });
-
-    const result = await verificationResponse.json();
+    const result = await $fetch("/api/auth/callback", {
+      method: "POST",
+      body: { code, state, code_verifier: codeVerifier }
+    }) as any;
+  
     console.log("Verification result: ", result);
      await signIn(
         { token: result.token /*email: emailInput, password: passwordInput, type: "email"*/ },
@@ -88,7 +54,7 @@ onMounted(async () => {
         .then(() => {
             user.value = {
                 id: "",
-                friendlyName: address
+                friendlyName: result.address
             };
         })
         .catch((err) => {

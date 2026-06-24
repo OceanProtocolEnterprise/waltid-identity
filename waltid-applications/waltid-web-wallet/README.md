@@ -20,6 +20,19 @@
 
 ### Running the project using Docker
 
+#### Environment Configuration for Signer Server
+Before running container with dev walt.id interface, `.env` file, located in root-folder, next to `Dockerfile`, should be created and populated with following variables for connecting with Signer Server:
+
+- **AUTHENTIK_TOKEN_URL** - retrieved from Participant Authentik OIDC provider Token URL;
+- **NUXT_PUBLIC_CLIENT_ID** - retrieved from Participant Authentik OIDC provider Client ID;
+- **CLIENT_SECRET** - retrieved from Participant Authentik OIDC provider Client Secret;
+- **NUXT_PUBLIC_AUTHENTIK_ISSUER** - retrieved from Participant Authentik OIDC provider Issuer;
+- **NUXT_PUBLIC_REDIRECT_URI** - which is walt.id hostname with endpoint /auth/callback. Make sure to register in Authentik as Allowed Origins or Redirect URIs the same value;
+- **NUXT_PUBLIC_LOGOUT_REDIRECT_URI** - which is walt.id hostname;
+- **WALLET_API_INTERNAL_URL**=http://caddy:7001/wallet-api
+
+#### Container Building & Running
+
 From the root-folder you can run the wallet-api including the necessary configuration as well as other relevant services and apps like the wallet frontend by the following command:
 ```bash
 cd docker-compose && docker compose up

@@ -397,15 +397,16 @@ import {storeToRefs} from "pinia";
 import {useTenant} from "@waltid-web-wallet/composables/tenants.ts";
 import {decodeJwt} from "jose";
 import {MetaMaskSDK} from "@metamask/sdk";
+import { useNuxtApp } from "nuxt/app";
 
 const store = useModalStore();
 const { $auth } = useNuxtApp();
 
-const tenant = await useTenant().value;
-const bgImg = tenant?.bgImage;
-const name = tenant?.name;
-const logoImg = tenant?.logoImage;
-const showWaltidLoadingSpinner = tenant?.showWaltidLoadingSpinner;
+const { data: tenant } = await useTenant();
+const bgImg = computed(() => tenant.value?.bgImage);
+const name = computed(() => tenant.value?.name);
+const logoImg = computed(() => tenant.value?.logoImage);
+const showWaltidLoadingSpinner = computed(() => tenant.value?.showWaltidLoadingSpinner);
 
 const isLoggingIn = ref(false);
 const error = ref({});
@@ -460,13 +461,19 @@ function closeModal() {
     error.value = {};
 }
 
-const MMSDK = new MetaMaskSDK({
-  dappMetadata: {name: "Walt.id Web Wallet", url: window.location.href},
-  injectProvider: true
-});
+const MMSDK = import.meta.client
+  ? new MetaMaskSDK({
+      dappMetadata: {
+        name: "Walt.id Web Wallet",
+        url: window.location.href,
+      },
+      injectProvider: true,
+    })
+  : null;
 
 async function connectSignerServer() {
-    await $auth.signinRedirect();
+  if (!$auth) return;
+  await $auth.signinRedirect();
 }
 
 
@@ -533,14 +540,18 @@ const cardStyle = computed(() => ({
 useHead({
     title: "Login to your wallet - walt.id"
 });
+const isOidcLogin = ref(false);
 
-const route = useRoute();
-if (route.redirectedFrom != undefined) {
+onMounted(() => {
+  const route = useRoute();
+
+  if (route.redirectedFrom) {
     console.log(`Redirected from: ${JSON.stringify(route.redirectedFrom)}`);
     signInRedirectUrl.value = route.redirectedFrom.fullPath;
-}
+  }
 
-const isOidcLogin = ref(route.query.oidc_login == "true");
+  isOidcLogin.value = route.query.oidc_login == "true";
+});
 
 async function authnzLogin(address, token) {
     console.log("authnz: logging in");
@@ -642,6 +653,5 @@ if (isOidcLogin.value) {
 
 .zoom-out {
     animation: zoom-out 0.5s normal forwards;
-    //animation: none;
 }
 </style>
