@@ -24,7 +24,8 @@
     "qr-scanner": "^1.4.2",
     "qrcode.vue": "^3.6.0",
     "unocss": "66.5.0",
-    "viem": "^2.21.0"
+    "viem": "^2.21.0",
+    "oidc-client-ts": "^3.5.0"
   },
   "devDependencies": {
     "@nuxt/content": "^2.13.4",

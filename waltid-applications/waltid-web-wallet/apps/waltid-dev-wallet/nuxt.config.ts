@@ -41,7 +41,7 @@ export default defineNuxtConfig({
     },
 
     globalAppMiddleware: {
-      isEnabled: true,
+      isEnabled: false,
     },
   },
 
@@ -188,9 +188,17 @@ export default defineNuxtConfig({
       dfnsOrgId: process.env.DFNS_ORG_ID, // To be replaced by dropdown list
       dfnsBaseUrl: process.env.DFNS_BASE_URL || "https://api.dfns.io",
       rpId: process.env.DFNS_RP_ID || "wallet-dev-stage.oceanenterprise.io",
-      clientId: process.env.AUTHENTIK_CLIENT_ID,
-      redirectUri: process.env.AUTHENTIK_REDIRECT_URI,
+      issuer: process.env.NUXT_PUBLIC_AUTHENTIK_ISSUER,
+      clientId: process.env.NUXT_PUBLIC_CLIENT_ID,
+      redirectUri: process.env.NUXT_PUBLIC_REDIRECT_URI,
+      responseType: "code",
+      scope: "openid profile email federated_identity organizationId signerServer walletId",
+      postLogoutRedirectUri: process.env.NUXT_PUBLIC_LOGOUT_REDIRECT_URI,
+      walletApi: process.env.NUXT_PUBLIC_WALLET_API
     },
+    tokenUrl: process.env.AUTHENTIK_TOKEN_URL,
+    clientSecret: process.env.CLIENT_SECRET,
+    walletApiInternal: process.env.WALLET_API_INTERNAL_URL
   },
 
   nitro: {
@@ -221,6 +229,6 @@ export default defineNuxtConfig({
   // }
   //proxy: [ 'http://localhost:4545/api' ]
 
-  ssr: false,
+  ssr: true,
   compatibilityDate: "2024-07-26",
 });

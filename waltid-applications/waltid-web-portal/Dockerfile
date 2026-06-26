@@ -10,7 +10,6 @@ WORKDIR /build
 ENV PNPM_IGNORE_BUILDS=false
 RUN pnpm install --ignore-scripts && pnpm approve-builds unrs-resolver && pnpm install
 
-
 RUN pnpm build
 
 # RUN
