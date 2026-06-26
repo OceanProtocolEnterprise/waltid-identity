@@ -11,7 +11,9 @@ RUN cd apps/waltid-dev-wallet && npm install
 COPY waltid-applications/waltid-web-wallet .
 COPY waltid-applications/waltid-web-wallet/apps/waltid-dev-wallet/.env .env
 RUN set -a && . ./.env && set +a && cd apps/waltid-dev-wallet && npm run build
-RUN cd apps/waltid-dev-wallet && npm run build
+
+RUN ls -la /app/apps/waltid-dev-wallet/.output/server/chunks/routes/api/auth/ || echo "WARNING: callback route not found in build output"
+
 
 # copy build output into final image
 FROM node:alpine AS release

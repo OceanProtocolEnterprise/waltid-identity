@@ -66,7 +66,6 @@ services:
     environment:
       NUXT_PUBLIC_ISSUER_CALLBACK_URL: "http://$SERVICE_HOST:$DEMO_WALLET_FRONTEND_PORT"
       NUXT_PUBLIC_DEV_WALLET_URL: "http://$SERVICE_HOST:$DEV_WALLET_FRONTEND_PORT"
-      NUXT_PUBLIC_ISSUER_CALLBACK_URL: "http://$SERVICE_HOST:$DEV_WALLET_FRONTEND_PORT"
       NUXT_PUBLIC_DEMO_WALLET_URL: "http://$SERVICE_HOST:$DEMO_WALLET_FRONTEND_PORT"
       PORT: $DEMO_WALLET_FRONTEND_PORT
 
@@ -85,6 +84,7 @@ services:
       - caddy
     environment:
       NUXT_PUBLIC_ISSUER_CALLBACK_URL: "http://$SERVICE_HOST:$DEV_WALLET_FRONTEND_PORT"
+      NUXT_PUBLIC_DEV_WALLET_URL: "http://$SERVICE_HOST:$DEV_WALLET_FRONTEND_PORT"
       NUXT_PUBLIC_DEMO_WALLET_URL: "http://$SERVICE_HOST:$DEMO_WALLET_FRONTEND_PORT"
       PORT: $DEV_WALLET_FRONTEND_PORT
       DFNS_ORG_ID: $DFNS_ORG_ID
@@ -220,10 +220,10 @@ services:
         protocol: tcp
         mode: host
 
-      # - target: "$DEV_WALLET_FRONTEND_PORT"
-      #   published: $DEV_WALLET_FRONTEND_PORT # waltid-dev-wallet
-      #   protocol: tcp
-      #   mode: host
+      - target: "$DEV_WALLET_FRONTEND_PORT"
+        published: $DEV_WALLET_FRONTEND_PORT # waltid-dev-wallet
+        protocol: tcp
+        mode: host
 
       - target: "$WEB_PORTAL_PORT"
         published: $WEB_PORTAL_PORT # web-portal

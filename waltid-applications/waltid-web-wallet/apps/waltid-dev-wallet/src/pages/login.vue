@@ -33,7 +33,7 @@
                     <div>
                         <!-- open modal for all 'connect with' chains -->
                         <div class="flex h-14 gap-5 mx-1">
-                            <div class="w-full inline-flex justify-center">
+                            <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
                                     @click="openWeb3()"
@@ -66,7 +66,7 @@
                             </div>
                         </div>
 
-                            <div class="w-full inline-flex justify-center">
+                            <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
                                     @click="connectOidc()"
@@ -100,7 +100,7 @@
                         </div>
                     
 
- <div class="w-full inline-flex justify-center" style="padding-top:15px;">
+        <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
                                     @click="openDfnsModal()">
@@ -129,10 +129,10 @@
                                     >
                     Connect with DFNS
                   </span>
-                                    <span class="relative invisible">Connect with DFNS</span>
-                                </button>
-                        </div>
-            <div class="w-full inline-flex justify-center" style="padding-top:15px;">
+                  <span class="relative invisible">Connect with DFNS</span>
+                </button>
+            </div>
+        <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
                                     @click="connectSignerServer()"
@@ -163,18 +163,18 @@
             <span class="relative invisible">Connect with Signer Server</span>
                                 </button>
                     </div>
+                </div>
 
                         <div class="relative mt-6">
                             <div
                                 aria-hidden="true"
                                 class="absolute inset-0 flex items-center"
                             >
-                                <div class="w-full border-t border-gray-300">
+                                <div class="w-full border-t border-gray-300" />
                             </div>
-                            <div class="relative flex justify-center text-sm">
+                    <div class="relative flex justify-center text-sm">
                 <span class="bg-white px-2 text-gray-500 rounded-3xl"
-                >Or continue with</span
-                >
+                >Or continue with</span>
                             </div>
                         </div>
                     </div>
@@ -299,7 +299,6 @@
                     </div>
                 </div>
             </div>
-        </div>
         <div
             class="overflow-hidden max-h-screen absolute left-0 w-full h-full -z-10 hidden lg:block"
         >
@@ -517,10 +516,9 @@ import { DfnsAuthenticator, DfnsApiClient } from '@dfns/sdk'
 import { DfnsWallet } from '@dfns/lib-viem'
 import { useNuxtApp, useRuntimeConfig } from "nuxt/app";
 
-const router = useRouter()
 const store = useModalStore();
 const { $auth } = useNuxtApp();
-const router = useRouter()
+const router = useRouter();
 
 const { data: tenant } = await useTenant();
 const bgImg = computed(() => tenant.value?.bgImage);
