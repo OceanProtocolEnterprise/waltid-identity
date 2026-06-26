@@ -5,6 +5,18 @@ let userManager: UserManager | null = null;
 export default defineNuxtPlugin(() => {
   if (import.meta.server) return;
   const config = useRuntimeConfig()
+  if (
+    !config.public.issuer ||
+    !config.public.clientId ||
+    !config.public.redirectUri
+  ) {
+    console.log("OIDC plugin skipped: missing required config values");
+    return {
+      provide: {
+        auth: null as UserManager | null,
+      },
+    };
+  }
   if (!userManager) {
     userManager = new UserManager({
       authority: config.public.issuer as string,
@@ -19,7 +31,7 @@ export default defineNuxtPlugin(() => {
 
   return {
     provide: {
-      auth: userManager,
+      auth: userManager as UserManager | null,
     },
   };
 });

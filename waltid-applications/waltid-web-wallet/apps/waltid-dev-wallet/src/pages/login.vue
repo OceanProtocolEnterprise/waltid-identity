@@ -472,7 +472,13 @@ const MMSDK = import.meta.client
   : null;
 
 async function connectSignerServer() {
-  if (!$auth) return;
+  if (!$auth) {
+    error.value = {
+        isError: true,
+        message: "Configuration for Authentik is missing. Please consult deployment environment variables specific for Signer Server."
+    };
+    return;
+  }
   await $auth.signinRedirect();
 }
 
