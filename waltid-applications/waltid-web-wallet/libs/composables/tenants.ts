@@ -1,7 +1,7 @@
-import {createError, useAppConfig, useFetch, useRequestURL, useState} from "nuxt/app";
+import {createError, useAppConfig, useFetch, useRequestURL, useAsyncData} from "nuxt/app";
 
 export function useTenant() {
-    return useState("tenant-config", async () => {
+    return useAsyncData("tenant-config", async () => {
         const config = useAppConfig();
 
         if (config.enableCloudTenants) {

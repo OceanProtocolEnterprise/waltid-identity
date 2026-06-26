@@ -20,6 +20,29 @@
 
 ### Running the project using Docker
 
+#### Environment Configuration for Signer Server - Dev Wallet Interface
+DEV Wallet Interface supports Signer Server connection.
+
+Before running container with dev walt.id interface, `.env` file, located in root-folder, next to `Dockerfile`, should be created and populated with following variables for connecting with Signer Server:
+
+- **AUTHENTIK_TOKEN_URL** - retrieved from Participant Authentik OIDC provider Token URL;
+- **NUXT_PUBLIC_CLIENT_ID** - retrieved from Participant Authentik OIDC provider Client ID;
+- **CLIENT_SECRET** - retrieved from Participant Authentik OIDC provider Client Secret;
+- **NUXT_PUBLIC_AUTHENTIK_ISSUER** - retrieved from Participant Authentik OIDC provider Issuer;
+- **NUXT_PUBLIC_REDIRECT_URI** - which is walt.id hostname with endpoint /auth/callback. Make sure to register in Authentik as Allowed Origins or Redirect URIs the same value;
+- **NUXT_PUBLIC_LOGOUT_REDIRECT_URI** - which is walt.id hostname;
+- **WALLET_API_INTERNAL_URL**=http://caddy:7001/wallet-api
+
+Variables which do __not__ have prefix `NUXT_PUBLIC_*` are used on server-side rendering to not exposed in the Browser.
+
+##### Troubleshooting Signer Server Configuration
+Signer Server authentication uses Authentik emitted JWT.
+
+If **NUXT_PUBLIC_CLIENT_ID**,  **NUXT_PUBLIC_AUTHENTIK_ISSUER**, **NUXT_PUBLIC_REDIRECT_URI** are missing, Browser console skips initializing Authentik plugin and therefore, connection with Signer Server will not be performed when clicking `Connect to Signer Server` button.
+<img src="./apps/waltid-dev-wallet/assets/MissingAuthentikConfiguration.png" alt="Alt text" width="300" />
+
+#### Container Building & Running
+
 From the root-folder you can run the wallet-api including the necessary configuration as well as other relevant services and apps like the wallet frontend by the following command:
 ```bash
 cd docker-compose && docker compose up

@@ -97,6 +97,39 @@
                                 </button>
                             </div>
                         </div>
+                
+                <div class="w-full inline-flex justify-center" style="padding-top:15px;">
+                                <button
+                                    class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
+                                    @click="connectSignerServer()"
+                                >
+                  <span
+                      class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-blue-600 group-hover:translate-x-0 ease"
+                  >
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                      ></path>
+                    </svg>
+                  </span>
+                                    <span
+                                        class="absolute flex items-center justify-center w-full h-full text-blue-600 transition-all duration-300 transform group-hover:translate-x-full ease"
+                                    >
+                    Connect with Signer Server
+                  </span>
+                                    <span class="relative invisible">Connect with Signer Server</span>
+                                </button>
+                            </div>
+                    </div>
 
                         <div class="relative mt-6">
                             <div
@@ -259,7 +292,7 @@
             :style="cardStyle"
             class="absolute bottom-3.5 right-3.5 w-10 lg:w-16 h-10 lg:h-16 overflow-hidden"
         >
-            <img class="overflow-hidden" src="/svg/walt-s.svg" />
+            <img class="overflow-hidden" src="../public/svg/walt-s.svg" />
         </div>
 
         <!--suppress PointlessBooleanExpressionJS -->
@@ -277,7 +310,8 @@
                 >
                     <div
                         class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                    />
+                    >
+                    </div>
                 </TransitionChild>
 
                 <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -344,7 +378,6 @@
                 </div>
             </Dialog>
         </TransitionRoot>
-    </div>
 </template>
 
 <script lang="ts" setup>
@@ -364,14 +397,16 @@ import {storeToRefs} from "pinia";
 import {useTenant} from "@waltid-web-wallet/composables/tenants.ts";
 import {decodeJwt} from "jose";
 import {MetaMaskSDK} from "@metamask/sdk";
+import { useNuxtApp } from "nuxt/app";
 
 const store = useModalStore();
+const { $auth } = useNuxtApp();
 
-const tenant = await useTenant().value;
-const bgImg = tenant?.bgImage;
-const name = tenant?.name;
-const logoImg = tenant?.logoImage;
-const showWaltidLoadingSpinner = tenant?.showWaltidLoadingSpinner;
+const { data: tenant } = await useTenant();
+const bgImg = computed(() => tenant.value?.bgImage);
+const name = computed(() => tenant.value?.name);
+const logoImg = computed(() => tenant.value?.logoImage);
+const showWaltidLoadingSpinner = computed(() => tenant.value?.showWaltidLoadingSpinner);
 
 const isLoggingIn = ref(false);
 const error = ref({});
@@ -426,12 +461,26 @@ function closeModal() {
     error.value = {};
 }
 
-const MMSDK = new MetaMaskSDK({
-  dappMetadata: {name: "Walt.id Web Wallet", url: window.location.href},
-  injectProvider: true
-});
+const MMSDK = import.meta.client
+  ? new MetaMaskSDK({
+      dappMetadata: {
+        name: "Walt.id Web Wallet",
+        url: window.location.href,
+      },
+      injectProvider: true,
+    })
+  : null;
 
-
+async function connectSignerServer() {
+  if (!$auth) {
+    error.value = {
+        isError: true,
+        message: "Configuration for Authentik is missing. Please consult deployment environment variables specific for Signer Server."
+    };
+    return;
+  }
+  await $auth.signinRedirect();
+}
 
 
 async function openWeb3() {
@@ -497,14 +546,18 @@ const cardStyle = computed(() => ({
 useHead({
     title: "Login to your wallet - walt.id"
 });
+const isOidcLogin = ref(false);
 
-const route = useRoute();
-if (route.redirectedFrom != undefined) {
+onMounted(() => {
+  const route = useRoute();
+
+  if (route.redirectedFrom) {
     console.log(`Redirected from: ${JSON.stringify(route.redirectedFrom)}`);
     signInRedirectUrl.value = route.redirectedFrom.fullPath;
-}
+  }
 
-const isOidcLogin = ref(route.query.oidc_login == "true");
+  isOidcLogin.value = route.query.oidc_login == "true";
+});
 
 async function authnzLogin(address, token) {
     console.log("authnz: logging in");
@@ -606,6 +659,5 @@ if (isOidcLogin.value) {
 
 .zoom-out {
     animation: zoom-out 0.5s normal forwards;
-    //animation: none;
 }
 </style>
