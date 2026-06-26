@@ -844,8 +844,6 @@ async function connectDfns() {
       console.log('Passkey registered successfully')
     }
 
-    // Wallet Permissions
-    console.log('Initializing Dfns EOA wallet...')
     let accounts
     try {
         accounts = await dfnsBrowserClient.wallets.listWallets()
@@ -856,7 +854,6 @@ async function connectDfns() {
         console.error(`No wallets created in DFNS`)
         router.push('/')
     }
-    console.log(`User has enought priviledges to sign`)
     const walletId = accounts?.items.filter(wallet => wallet.status === "Active")[0].id as string
 
     console.log('Initializing Dfns EOA wallet...')
