@@ -9,8 +9,7 @@ COPY waltid-applications/waltid-web-wallet/apps/waltid-dev-wallet/package.json .
 RUN cd apps/waltid-dev-wallet && npm install
 
 COPY waltid-applications/waltid-web-wallet .
-COPY waltid-applications/waltid-web-wallet/apps/waltid-dev-wallet/.env .env
-RUN set -a && . ./.env && set +a && cd apps/waltid-dev-wallet && npm run build
+RUN set -a && . ./apps/waltid-dev-wallet/.env && set +a && cd apps/waltid-dev-wallet && npm run build
 
 RUN ls -la /app/apps/waltid-dev-wallet/.output/server/chunks/routes/api/auth/ || echo "WARNING: callback route not found in build output"
 
