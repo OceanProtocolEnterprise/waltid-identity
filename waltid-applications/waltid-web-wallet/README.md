@@ -39,6 +39,7 @@ Variables which do __not__ have prefix `NUXT_PUBLIC_*` are used on server-side r
 Signer Server authentication uses Authentik emitted JWT.
 
 If **NUXT_PUBLIC_CLIENT_ID**,  **NUXT_PUBLIC_AUTHENTIK_ISSUER**, **NUXT_PUBLIC_REDIRECT_URI** are missing, Browser console skips initializing Authentik plugin and therefore, connection with Signer Server will not be performed when clicking `Connect to Signer Server` button.
+
 <img src="./apps/waltid-dev-wallet/assets/MissingAuthentikConfiguration.png" alt="Alt text" width="300" />
 
 #### Container Building & Running

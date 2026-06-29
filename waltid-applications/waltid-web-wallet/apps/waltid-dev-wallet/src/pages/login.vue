@@ -33,7 +33,7 @@
                     <div>
                         <!-- open modal for all 'connect with' chains -->
                         <div class="flex h-14 gap-5 mx-1">
-                            <div class="w-full inline-flex justify-center">
+                            <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
                                     @click="openWeb3()"
@@ -64,8 +64,9 @@
                                     <span class="relative invisible">Connect with web3</span>
                                 </button>
                             </div>
+                        </div>
 
-                            <div class="w-full inline-flex justify-center">
+                            <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
                                     @click="connectOidc()"
@@ -97,12 +98,14 @@
                                 </button>
                             </div>
                         </div>
-                
-                <div class="w-full inline-flex justify-center" style="padding-top:15px;">
+                    
+
+        <div class="w-full inline-flex justify-center" style="padding-top:15px;">
                                 <button
                                     class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
-                                    @click="connectSignerServer()"
-                                >
+                                    @click="openDfnsModal()">
+                
+                
                   <span
                       class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-blue-600 group-hover:translate-x-0 ease"
                   >
@@ -124,12 +127,43 @@
                                     <span
                                         class="absolute flex items-center justify-center w-full h-full text-blue-600 transition-all duration-300 transform group-hover:translate-x-full ease"
                                     >
+                    Connect with DFNS
+                  </span>
+                  <span class="relative invisible">Connect with DFNS</span>
+                </button>
+            </div>
+        <div class="w-full inline-flex justify-center" style="padding-top:15px;">
+                                <button
+                                    class="relative inline-flex items-center justify-center p-4 px-6 py-3 overflow-hidden font-medium text-blue-600 transition duration-300 ease-out border-2 border-blue-600 rounded-full shadow-md group"
+                                    @click="connectSignerServer()"
+                                >
+                                      <span
+                      class="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-blue-600 group-hover:translate-x-0 ease"
+                  >
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                      ></path>
+                    </svg>
+                  </span>
+                <span
+                    class="absolute flex items-center justify-center w-full h-full text-blue-600 transition-all duration-300 transform group-hover:translate-x-full ease"
+                >
                     Connect with Signer Server
                   </span>
-                                    <span class="relative invisible">Connect with Signer Server</span>
+            <span class="relative invisible">Connect with Signer Server</span>
                                 </button>
-                            </div>
                     </div>
+                </div>
 
                         <div class="relative mt-6">
                             <div
@@ -138,10 +172,9 @@
                             >
                                 <div class="w-full border-t border-gray-300" />
                             </div>
-                            <div class="relative flex justify-center text-sm">
+                    <div class="relative flex justify-center text-sm">
                 <span class="bg-white px-2 text-gray-500 rounded-3xl"
-                >Or continue with</span
-                >
+                >Or continue with</span>
                             </div>
                         </div>
                     </div>
@@ -266,7 +299,6 @@
                     </div>
                 </div>
             </div>
-        </div>
         <div
             class="overflow-hidden max-h-screen absolute left-0 w-full h-full -z-10 hidden lg:block"
         >
@@ -378,6 +410,88 @@
                 </div>
             </Dialog>
         </TransitionRoot>
+        <div
+  v-if="showDfnsModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <h3 class="text-lg font-semibold mb-4">
+      Connect with DFNS
+    </h3>
+
+    <label class="block mb-2 text-sm font-medium text-gray-700">
+      Email Address
+    </label>
+
+    <input
+      v-model="email"
+      type="email"
+      placeholder="name@example.com"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      @keyup.enter="submitDfnsLogin"
+    />
+
+    <div class="flex justify-end gap-3 mt-6">
+      <button
+        class="px-4 py-2 text-gray-600 border rounded-lg"
+        @click="closeDfnsModal"
+      >
+        Cancel
+      </button>
+
+      <button
+        :disabled="loadingDfns || !email"
+        class="px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50"
+        @click="submitDfnsLogin"
+      >
+        {{ loadingDfns ? 'Connecting...' : 'Continue' }}
+      </button>
+    </div>
+  </div>
+</div>
+<div
+  v-if="showRegistrationCodeModal"
+  class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <h3 class="text-lg font-semibold mb-4">
+      Register Passkey
+    </h3>
+
+    <p class="text-sm text-gray-500 mb-4">
+      Enter the registration code sent to your email to register a passkey for transaction signing.
+    </p>
+
+    <label class="block mb-2 text-sm font-medium text-gray-700">
+      Registration Code
+    </label>
+
+    <input
+      v-model="registrationCode"
+      type="text"
+      placeholder="0000-0000-0000-0000"
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      @keyup.enter="submitRegistrationCode"
+    />
+
+    <div class="flex justify-end gap-3 mt-6">
+      <button
+        class="px-4 py-2 text-gray-600 border rounded-lg"
+        @click="cancelRegistrationCode"
+      >
+        Cancel
+      </button>
+
+      <button
+        :disabled="!registrationCode"
+        class="px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50"
+        @click="submitRegistrationCode"
+      >
+        Register
+      </button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script lang="ts" setup>
@@ -397,10 +511,14 @@ import {storeToRefs} from "pinia";
 import {useTenant} from "@waltid-web-wallet/composables/tenants.ts";
 import {decodeJwt} from "jose";
 import {MetaMaskSDK} from "@metamask/sdk";
-import { useNuxtApp } from "nuxt/app";
+import { WebAuthnSigner } from '@dfns/sdk-browser'
+import { DfnsAuthenticator, DfnsApiClient } from '@dfns/sdk'
+import { DfnsWallet } from '@dfns/lib-viem'
+import { useNuxtApp, useRuntimeConfig } from "nuxt/app";
 
 const store = useModalStore();
 const { $auth } = useNuxtApp();
+const router = useRouter();
 
 const { data: tenant } = await useTenant();
 const bgImg = computed(() => tenant.value?.bgImage);
@@ -421,6 +539,61 @@ const { user } = storeToRefs(userStore);
 const { status, data, signIn } = useAuth();
 
 const signInRedirectUrl = ref("/");
+
+
+const showDfnsModal = ref(false)
+const email = ref('')
+const loadingDfns = ref(false)
+
+const showRegistrationCodeModal = ref(false)
+const registrationCode = ref('')
+
+let registrationCodeResolve: ((value: string | null) => void) | null = null
+
+
+function promptForRegistrationCode(): Promise<string | null> {
+  return new Promise((resolve) => {
+    registrationCode.value = ''
+    registrationCodeResolve = resolve
+    showRegistrationCodeModal.value = true
+  })
+}
+
+function submitRegistrationCode() {
+  if (!registrationCode.value) return
+  showRegistrationCodeModal.value = false
+  registrationCodeResolve?.(registrationCode.value.trim())
+  registrationCodeResolve = null
+}
+
+function cancelRegistrationCode() {
+  showRegistrationCodeModal.value = false
+  registrationCodeResolve?.(null)
+  registrationCodeResolve = null
+}
+
+const openDfnsModal = () => {
+  showDfnsModal.value = true
+}
+
+const closeDfnsModal = () => {
+  showDfnsModal.value = false
+}
+
+const submitDfnsLogin = async () => {
+  if (!email.value) return
+
+  loadingDfns.value = true
+
+  try {
+    await connectDfns()
+    showDfnsModal.value = false
+
+    email.value = ''
+  } finally {
+    loadingDfns.value = false
+  }
+}
 
 async function connectOidc() {
     navigateTo("/wallet-api/auth/oidc-login", { external: true });
@@ -523,6 +696,196 @@ async function openWeb3() {
     const result = await verificationResponse.json();
     console.log("Verification result: ", result);
     await authnzLogin(address, result.token);
+}
+
+function openSsoPopup(
+  ssoUrl: string,
+  redirectUri: string
+): Promise<{ code: string; state: string }> {
+  return new Promise((resolve, reject) => {
+    const width = 500
+    const height = 600
+    const left = window.screenX + (window.innerWidth - width) / 2
+    const top = window.screenY + (window.innerHeight - height) / 2
+
+    const popup = window.open(
+      ssoUrl,
+      'sso-login',
+      `width=${width},height=${height},left=${left},top=${top}`
+    )
+
+    if (!popup) {
+      return reject(new Error('Popup blocked — please allow popups for this site'))
+    }
+
+    const redirectOrigin = new URL(redirectUri).origin
+    const redirectPath = new URL(redirectUri).pathname
+
+    const interval = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(interval)
+        reject(new Error('SSO login was cancelled'))
+        return
+      }
+
+      try {
+        // Can only read location once popup redirects back to our origin
+        if (
+          popup.location.origin === redirectOrigin &&
+          popup.location.pathname === redirectPath
+        ) {
+          const params = new URL(popup.location.href).searchParams
+          const code = params.get('code')
+          const state = params.get('state')
+
+          clearInterval(interval)
+          popup.close()
+
+          if (code && state) {
+            resolve({ code, state })
+          } else {
+            reject(new Error('SSO callback missing code or state'))
+          }
+        }
+      } catch {
+        // cross-origin — popup is still on Authentik, keep waiting
+      }
+    }, 300)
+  })
+}
+
+async function connectDfns() {
+  if (!email.value) return
+  console.log(`Logging in as ${email.value}...`)
+
+  const config = useRuntimeConfig()
+
+  const orgId = (config.public.dfnsOrgId || "or-01jo1-70lau-elvati4vg10e11ss") as string
+  const baseUrl = config.public.dfnsBaseUrl as string
+  const ssoClientId = config.public.clientId as string
+  const ssoRedirectUri = (config.public.redirectUri || "https://wallet-dev-stage.oceanenterprise.io/auth/callback") as string
+  const relyingParty = (config.public.rpId || "wallet-dev-stage.oceanenterprise.io") as string
+
+  try {
+    console.log('Initiating SSO login...')
+
+    const ssoInitRes = await fetch(`${baseUrl}/auth/login/sso/init`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orgId,
+        clientId: ssoClientId,
+        redirectUri: ssoRedirectUri,
+      }),
+    })
+
+    if (!ssoInitRes.ok) {
+      throw new Error(`SSO init failed: ${ssoInitRes.statusText}`)
+    }
+
+    const { ssoRedirectUrl } = await ssoInitRes.json()
+
+    const { code, state } = await openSsoPopup(ssoRedirectUrl, ssoRedirectUri as string)
+
+    const ssoCompleteRes = await fetch(`${baseUrl}/auth/login/sso`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, state }),
+    })
+
+    if (!ssoCompleteRes.ok) {
+      throw new Error(`SSO login failed: ${ssoCompleteRes.statusText}`)
+    }
+
+    const { token } = await ssoCompleteRes.json()
+    console.log('SSO authentication successful')
+
+    let webAuthnSigner = new WebAuthnSigner({
+      relyingParty: {
+        id: relyingParty,
+        name: "Walt.id",
+      },
+    })
+
+    console.log(`JWT: ${token}`)
+    const dfnsBrowserClient = new DfnsApiClient({
+      baseUrl,
+      authToken: token,
+      signer: webAuthnSigner,
+    })
+
+
+    // Passkey registration mechanism
+    const userId = decodeJwt(token)["https://custom/app_metadata"].userId as string
+    const userProfile = await dfnsBrowserClient.auth.getUser({
+        userId: userId
+    })
+
+    if (!userProfile.isRegistered) {
+        console.log('No passkey found — registering for transaction signing...')
+
+      const registrationCode = await promptForRegistrationCode()
+      if (!registrationCode) {
+        console.error('Registration code required but not provided')
+        router.push('/')
+        return
+      }
+
+      const dfnsAuth = new DfnsAuthenticator({ baseUrl, signer: webAuthnSigner })
+
+      await dfnsAuth.register({
+        orgId,
+        username: email.value,
+        registrationCode,
+      })
+
+      console.log('Passkey registered successfully')
+    }
+
+    let accounts
+    try {
+        accounts = await dfnsBrowserClient.wallets.listWallets()
+    } catch(err) {
+        console.error(`DFNS wallet retrieval failed: ${err.message}`)
+    }
+    if (accounts?.items.length === 0) {
+        console.error(`No wallets created in DFNS`)
+        router.push('/')
+    }
+    const walletId = accounts?.items.filter(wallet => wallet.status === "Active")[0].id as string
+
+    console.log('Initializing Dfns EOA wallet...')
+    const dfnsWallet = await DfnsWallet.init({
+      walletId,
+      dfnsClient: dfnsBrowserClient,
+    })
+    console.log(`Dfns EOA address: ${dfnsWallet.address}`)
+
+    const response = await fetch("/wallet-api/auth/account/web3/nonce", { method: "GET" });
+    const challenge = await response.text();
+
+    const signature = await dfnsWallet.signMessage({message: challenge})
+
+    console.log("Signature:", signature);
+
+
+    const verificationResponse = await fetch("/wallet-api/auth/account/web3/signed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            publicKey: dfnsWallet.address,
+            signed: signature,
+            challenge: challenge
+        })
+    });
+
+    const result = await verificationResponse.json();
+    console.log("Verification result: ", result);
+    await authnzLogin(dfnsWallet.address, result.token);
+
+  } catch (err) {
+    console.error(`Login failed: ${err.message}`)
+  }
 }
 
 definePageMeta({

@@ -185,6 +185,9 @@ export default defineNuxtConfig({
       issuerCallbackUrl: "http://localhost:7100",
       credentialsRepositoryUrl: "http://localhost:3000",
       demoWalletUrl: "https://wallet-dev.walt.id",
+      dfnsOrgId: process.env.DFNS_ORG_ID, // To be replaced by dropdown list
+      dfnsBaseUrl: process.env.DFNS_BASE_URL || "https://api.dfns.io",
+      rpId: process.env.DFNS_RP_ID || "wallet-dev-stage.oceanenterprise.io",
       issuer: process.env.NUXT_PUBLIC_AUTHENTIK_ISSUER,
       clientId: process.env.NUXT_PUBLIC_CLIENT_ID,
       redirectUri: process.env.NUXT_PUBLIC_REDIRECT_URI,

@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     `${config.walletApiInternal}/auth/account/web3/nonce`
   );
 
-  const signerResponse = await $fetch(`${signerUrl}/sign-message`, {
+  const signerResponse = await $fetch(`${signerUrl}/api/v1/sign-message`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,

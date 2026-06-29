@@ -66,10 +66,11 @@ services:
     environment:
       NUXT_PUBLIC_ISSUER_CALLBACK_URL: "http://$SERVICE_HOST:$DEMO_WALLET_FRONTEND_PORT"
       NUXT_PUBLIC_DEV_WALLET_URL: "http://$SERVICE_HOST:$DEV_WALLET_FRONTEND_PORT"
+      NUXT_PUBLIC_DEMO_WALLET_URL: "http://$SERVICE_HOST:$DEMO_WALLET_FRONTEND_PORT"
       PORT: $DEMO_WALLET_FRONTEND_PORT
 
   waltid-dev-wallet:
-    image: ${IMAGE_PREFIX}waltid/waltid-dev-wallet:gaiax-0.1.1-OE
+    image: ${IMAGE_PREFIX}oceanenterprise/waltid-dev-wallet:gaiax-0.1.2-OE
     profiles:
       - apps
       - identity
@@ -83,8 +84,12 @@ services:
       - caddy
     environment:
       NUXT_PUBLIC_ISSUER_CALLBACK_URL: "http://$SERVICE_HOST:$DEV_WALLET_FRONTEND_PORT"
+      NUXT_PUBLIC_DEV_WALLET_URL: "http://$SERVICE_HOST:$DEV_WALLET_FRONTEND_PORT"
       NUXT_PUBLIC_DEMO_WALLET_URL: "http://$SERVICE_HOST:$DEMO_WALLET_FRONTEND_PORT"
       PORT: $DEV_WALLET_FRONTEND_PORT
+      DFNS_ORG_ID: $DFNS_ORG_ID
+      DFNS_BASE_URL: $DFNS_BASE_URL
+      DFNS_RP_ID: $DFNS_RP_ID
 
   web-portal:
     image: ${IMAGE_PREFIX}waltid/portal:${VERSION_TAG:-latest}
