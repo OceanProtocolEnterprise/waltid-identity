@@ -50,11 +50,14 @@ export default defineEventHandler(async (event) => {
     `${config.walletApiInternal}/auth/account/web3/nonce`
   );
 
+  const origin = getRequestOrigin(event);
+  console.info("Sending signer request with origin:", origin);
+
   const signerResponse = await $fetch(`${signerUrl}/api/v1/sign-message`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      Origin: getRequestOrigin(event),
+      Origin: origin,
       "Content-Type": "application/json",
     },
     body: {
