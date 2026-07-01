@@ -1,4 +1,17 @@
+import type { H3Event } from "h3";
 import { decodeJwt } from "jose";
+
+function getRequestOrigin(event: H3Event): string {
+  const host = getRequestHeader(event, "host");
+  const forwardedProto = getRequestHeader(event, "x-forwarded-proto");
+  const protocol = forwardedProto?.split(",")[0]?.trim() || "https";
+
+  if (!host) {
+    throw createError({ statusCode: 400, message: "Host header missing" });
+  }
+
+  return `${protocol}://${host}`;
+}
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -41,6 +54,7 @@ export default defineEventHandler(async (event) => {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      Origin: getRequestOrigin(event),
       "Content-Type": "application/json",
     },
     body: {
