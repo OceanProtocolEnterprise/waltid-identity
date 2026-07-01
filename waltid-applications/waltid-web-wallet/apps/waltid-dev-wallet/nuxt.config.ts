@@ -205,10 +205,7 @@ export default defineNuxtConfig({
     compressPublicAssets: {
       gzip: true,
       brotli: false,
-    },
-    devProxy: {
-      "/wallet-api/": "http://localhost:7001/wallet-api",
-    },
+    }
   },
 
   // i18n: {

@@ -1,4 +1,17 @@
+import type { H3Event } from "h3";
 import { decodeJwt } from "jose";
+
+function getRequestOrigin(event: H3Event): string {
+  const host = getRequestHeader(event, "host");
+  const forwardedProto = getRequestHeader(event, "x-forwarded-proto");
+  const protocol = forwardedProto?.split(",")[0]?.trim() || "https";
+
+  if (!host) {
+    throw createError({ statusCode: 400, message: "Host header missing" });
+  }
+
+  return `${protocol}://${host}`;
+}
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -37,10 +50,14 @@ export default defineEventHandler(async (event) => {
     `${config.walletApiInternal}/auth/account/web3/nonce`
   );
 
+  const origin = getRequestOrigin(event);
+  console.info("Sending signer request with origin:", origin);
+
   const signerResponse = await $fetch(`${signerUrl}/api/v1/sign-message`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      Origin: origin,
       "Content-Type": "application/json",
     },
     body: {
