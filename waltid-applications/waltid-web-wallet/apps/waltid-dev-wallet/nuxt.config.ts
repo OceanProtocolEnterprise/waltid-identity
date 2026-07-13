@@ -205,7 +205,10 @@ export default defineNuxtConfig({
     compressPublicAssets: {
       gzip: true,
       brotli: false,
-    }
+    },
+    routeRules: {
+      '/': { redirect: '/login' },
+    },
   },
 
   // i18n: {
