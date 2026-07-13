@@ -70,7 +70,7 @@ services:
       PORT: $DEMO_WALLET_FRONTEND_PORT
 
   waltid-dev-wallet:
-    image: ${IMAGE_PREFIX}oceanenterprise/waltid-dev-wallet:gaiax-0.1.2-OE
+    image: ${IMAGE_PREFIX}oceanenterprise/waltid-dev-wallet:gaiax-0.1.3-OE
     profiles:
       - apps
       - identity
