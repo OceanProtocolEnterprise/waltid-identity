@@ -205,6 +205,7 @@ if (process.client) {
 definePageMeta({
   title: "Select your wallet - walt.id",
   layout: "default-reduced-nav",
+  middleware: ["auth-required"],
 });
 </script>
 
