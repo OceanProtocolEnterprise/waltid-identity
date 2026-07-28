@@ -1,5 +1,5 @@
 <template>
-    <div class="flex min-h-full">
+    <div class="flex min-h-full relative z-10">
         <div
             class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 lg:bg-white lg:bg-opacity-50"
         >
@@ -300,14 +300,14 @@
                 </div>
             </div>
         <div
-            class="overflow-hidden max-h-screen absolute left-0 w-full h-full -z-10 hidden lg:block"
+            class="overflow-hidden max-h-screen fixed left-0 w-full h-full z-0 hidden lg:block"
         >
             <img
                 ref="container"
                 :class="[isLoggingIn ? 'zoom-in' : 'zoom-out']"
                 :src="bgImg"
                 alt=""
-                class="absolute inset-0 h-full w-full object-cover hidden lg:block -z-10"
+                class="absolute inset-0 h-full w-full object-cover hidden lg:block"
             />
             <!-- src="https://images.unsplash.com/photo-1529144415895-6aaf8be872fb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1980&q=80"/> -->
 
@@ -521,9 +521,9 @@ const { $auth } = useNuxtApp();
 const router = useRouter();
 
 const { data: tenant } = await useTenant();
-const bgImg = computed(() => tenant.value?.bgImage);
 const name = computed(() => tenant.value?.name);
-const logoImg = computed(() => tenant.value?.logoImage);
+const bgImg = computed(() => tenant.value?.bgImage || '/images/start-page-background.png');
+const logoImg = computed(() => tenant.value?.logoImage || '/svg/waltid.svg');
 const showWaltidLoadingSpinner = computed(() => tenant.value?.showWaltidLoadingSpinner);
 
 const isLoggingIn = ref(false);
