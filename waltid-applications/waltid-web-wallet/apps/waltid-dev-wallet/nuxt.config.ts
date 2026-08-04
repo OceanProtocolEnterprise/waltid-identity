@@ -192,7 +192,7 @@ export default defineNuxtConfig({
       clientId: "",
       redirectUri: "",
       responseType: "code",
-      scope: "openid profile email federated_identity organizationId signerServer walletId",
+      scope: "openid profile email oe-central-federated_identity oe-organizationId oe-signerServer oe-wellKnownUrl oe-walletId",
       postLogoutRedirectUri: "",
       walletApi: ""
     },
