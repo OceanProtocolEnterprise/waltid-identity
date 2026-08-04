@@ -1,6 +1,6 @@
 <template>
     <div class="h-full">
-        <slot class="h-full" />
+        <slot />
 
         <ClientOnly>
             <div v-if="$pwa?.needRefresh" class="pwa-toast" role="alert">

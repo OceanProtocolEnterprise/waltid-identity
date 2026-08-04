@@ -181,25 +181,25 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      projectId: process.env.ProjectId,
+      projectId: "",
       issuerCallbackUrl: "http://localhost:7100",
       credentialsRepositoryUrl: "http://localhost:3000",
       demoWalletUrl: "https://wallet-dev.walt.id",
-      dfnsOrgId: process.env.DFNS_ORG_ID, // To be replaced by dropdown list
-      dfnsBaseUrl: process.env.DFNS_BASE_URL || "https://api.dfns.io",
-      rpId: process.env.DFNS_RP_ID || "wallet-dev-stage.oceanenterprise.io",
-      issuer: process.env.NUXT_PUBLIC_AUTHENTIK_ISSUER,
-      clientId: process.env.NUXT_PUBLIC_CLIENT_ID,
-      redirectUri: process.env.NUXT_PUBLIC_REDIRECT_URI,
+      dfnsOrgId: "",
+      dfnsBaseUrl: "https://api.dfns.io",
+      rpId: "wallet-dev-stage.oceanenterprise.io",
+      issuer: "",
+      clientId: "",
+      redirectUri: "",
       responseType: "code",
       scope: "openid profile email federated_identity organizationId signerServer walletId",
-      postLogoutRedirectUri: process.env.NUXT_PUBLIC_LOGOUT_REDIRECT_URI,
-      walletApi: process.env.NUXT_PUBLIC_WALLET_API
+      postLogoutRedirectUri: "",
+      walletApi: ""
     },
-    tokenUrl: process.env.AUTHENTIK_TOKEN_URL,
-    clientSecret: process.env.CLIENT_SECRET,
-    walletApiInternal: process.env.WALLET_API_INTERNAL_URL
-  },
+    tokenUrl: "",
+    clientSecret: "",
+    walletApiInternal: ""
+    },
 
   nitro: {
     compressPublicAssets: {
