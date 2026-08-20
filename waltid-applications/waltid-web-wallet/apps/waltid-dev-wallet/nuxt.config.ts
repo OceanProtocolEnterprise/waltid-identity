@@ -198,7 +198,8 @@ export default defineNuxtConfig({
     },
     tokenUrl: "",
     clientSecret: "",
-    walletApiInternal: ""
+    walletApiInternal: "",
+    adminUserGroupName: ""
     },
 
   nitro: {

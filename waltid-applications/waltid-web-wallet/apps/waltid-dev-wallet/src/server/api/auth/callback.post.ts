@@ -48,6 +48,25 @@ export default defineEventHandler(async (event) => {
 
   const accessToken = tokenResponse.access_token;
   const decoded = decodeJwt(accessToken);
+  const adminGroup = config.adminUserGroupName as string | undefined;
+  const userGroups = (decoded.groups as string[]) ?? [];
+  // Check for admin group
+  if (adminGroup && userGroups.length === 0) {
+    throw createError({ statusCode: 403, message: "Not authorized for signer server: user has no groups assigned." });
+  }
+
+  if (adminGroup && !userGroups.includes(adminGroup)) {
+    throw createError({ statusCode: 403, message: `Not authorized for signer server: user is not a member of the required group "${adminGroup}".` });
+  }
+
+  if (!adminGroup && userGroups.length > 0) {
+    throw createError({ statusCode: 403, message: "Not authorized for signer server: token contains groups but no admin group is configured." });
+  }
+
+  // Authorized: either no admin group + no user groups (allow all), or admin group matched
+  console.log(adminGroup ? `User authorized via admin group "${adminGroup}".` : "No admin group restriction set.");
+
+      
   const signerUrl = decoded.signerServer as string;
 
   if (!signerUrl) {
