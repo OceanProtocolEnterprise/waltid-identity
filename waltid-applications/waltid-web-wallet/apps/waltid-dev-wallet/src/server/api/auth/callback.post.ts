@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (adminGroup && !userGroups.includes(adminGroup)) {
-    throw createError({ statusCode: 403, message: `Not authorized for signer server: user is not a member of the required group "${adminGroup}".` });
+    throw createError({ statusCode: 403, message: `Not authorized for signer server: user is not a member of the required group.` });
   }
 
   if (!adminGroup && userGroups.length > 0) {
@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Authorized: either no admin group + no user groups (allow all), or admin group matched
-  console.log(adminGroup ? `User authorized via admin group "${adminGroup}".` : "No admin group restriction set.");
+  console.log(adminGroup ? "User authorized via admin group." : "No admin group restriction set.");
 
       
   const signerUrl = decoded.signerServer as string;
