@@ -32,6 +32,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalStdlibApi::class)
 object Web3 : AuthenticationMethod("web3") {
     private val log = logger<Web3>()
+    private val smartAccountVerifier by lazy { SmartAccountSignatureVerifier() }
 
     private val jwtHandler = JwtTokenHandler().apply {
         signingKey = runBlocking { JWKKey.generate(KeyType.Ed25519) }
@@ -59,7 +60,8 @@ object Web3 : AuthenticationMethod("web3") {
     data class SiweRequest(
         val challenge: String,
         val signed: String,
-        val publicKey: String
+        val publicKey: String,
+        val aa: Boolean = false
     )
 
     suspend fun verifyEthereum2(challenge: String, signature: String, expectedAddress: String): String {
@@ -95,10 +97,8 @@ object Web3 : AuthenticationMethod("web3") {
     }
 
     suspend fun verifySiweLogin(siweReq: SiweRequest): String {
-        log.trace { "Verifying SIWE request: $siweReq" }
-
         val challenge = siweReq.challenge
-        log.trace { "Challenge was: $challenge. Verifying challenge authenticity..." }
+        log.trace { "Verifying challenge authenticity..." }
 
         authCheck(jwtHandler.validateToken(challenge)) { "Cannot verify that nonce was supplied by system." }
         log.trace { "Challenge is authentic. Verifying challenge timestamp..." }
@@ -116,8 +116,11 @@ object Web3 : AuthenticationMethod("web3") {
 
         log.trace { "Challenge did not yet expire. Verifying challenge signature..." }
 
-        val address = verifyEthereum2(challenge, siweReq.signed, siweReq.publicKey)
-        return address
+        return if (siweReq.aa) {
+            smartAccountVerifier.verify(challenge, siweReq.signed, siweReq.publicKey)
+        } else {
+            verifyEthereum2(challenge, siweReq.signed, siweReq.publicKey)
+        }
     }
 
     override fun Route.registerAuthenticationRoutes(
