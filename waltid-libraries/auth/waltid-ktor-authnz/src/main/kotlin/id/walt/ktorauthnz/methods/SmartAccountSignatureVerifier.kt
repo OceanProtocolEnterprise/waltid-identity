@@ -20,9 +20,12 @@ import org.web3j.utils.Numeric
 internal class SmartAccountSignatureVerifier(
     private val client: HttpClient = HttpClient {
         install(HttpTimeout) {
-            requestTimeoutMillis = 15_000
-            connectTimeoutMillis = 5_000
-            socketTimeoutMillis = 15_000
+            requestTimeoutMillis = System.getenv("SMART_ACCOUNT_RPC_REQUEST_TIMEOUT_MS")
+                ?.toLongOrNull()?.takeIf { it > 0 } ?: 15_000L
+            connectTimeoutMillis = System.getenv("SMART_ACCOUNT_RPC_CONNECT_TIMEOUT_MS")
+                ?.toLongOrNull()?.takeIf { it > 0 } ?: 5_000L
+            socketTimeoutMillis = System.getenv("SMART_ACCOUNT_RPC_SOCKET_TIMEOUT_MS")
+                ?.toLongOrNull()?.takeIf { it > 0 } ?: 15_000L
         }
     },
 ) {
@@ -30,7 +33,7 @@ internal class SmartAccountSignatureVerifier(
         challenge: String,
         signature: String,
         address: String,
-        rpcUrl: String? = KtorAuthnzManager.web3RpcUrl,
+        rpcUrl: String? = KtorAuthnzManager.smartAccountBundlerRPC,
     ): String {
         authCheck(!rpcUrl.isNullOrBlank()) { "AA signature verification is not configured" }
         authCheck(Regex("0x[0-9a-fA-F]{40}").matches(address)) { "Invalid smart-account address" }

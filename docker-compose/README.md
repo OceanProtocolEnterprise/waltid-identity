@@ -298,7 +298,7 @@ psql -U your_user_name -h your_host -d your_db_name < backup.sql
 ### Smart-account Web3 login
 
 Copy `.env.example` to `.env` on a fresh checkout. `.env` is private and ignored by Git.
-Set `WEB3_RPC_URL` in `.env` to the deployed account's chain RPC (Sepolia for the Kernel example).
+Set `SMART_ACCOUNT_BUNDLER_RPC` in `.env` to the deployed account's chain RPC (Sepolia for the Kernel example).
 The wallet-api service already loads `.env`; its `ktor-authnz` Web3 authentication is already enabled.
 Build a wallet-api image from this branch and update the wallet-api `image` in `docker-compose.yaml`
 to that image tag (OE currently pins `gaiax-0.1.1-OE`). Recreate only the wallet API:
