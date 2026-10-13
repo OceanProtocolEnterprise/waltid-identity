@@ -8,6 +8,9 @@ import id.walt.ktorauthnz.tokens.ktorauthnztoken.KtorAuthNzTokenHandler
 
 object KtorAuthnzManager {
 
+    /** Trusted chain RPC for deployed smart-account (ERC-1271) login; disabled when unset. */
+    var smartAccountBundlerRPC: String? = System.getenv("SMART_ACCOUNT_BUNDLER_RPC")
+
     var passwordHashingConfig = PasswordHashingConfiguration()
     lateinit var accountStore: EditableAccountStore
     var sessionStore = InMemorySessionStore()

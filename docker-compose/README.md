@@ -294,3 +294,19 @@ docker volume rm docker-compose_wallet-api-db
 pg_dump -U your_user_name -h your_host -d your_db_name > backup.sql
 psql -U your_user_name -h your_host -d your_db_name < backup.sql
 ```
+
+### Smart-account Web3 login
+
+Copy `.env.example` to `.env` on a fresh checkout. `.env` is private and ignored by Git.
+Set `SMART_ACCOUNT_BUNDLER_RPC` in `.env` to the deployed account's chain RPC (Sepolia for the Kernel example).
+The wallet-api service already loads `.env`; its `ktor-authnz` Web3 authentication is already enabled.
+Build a wallet-api image from this branch and update the wallet-api `image` in `docker-compose.yaml`
+to that image tag (OE currently pins `gaiax-0.1.1-OE`). Recreate only the wallet API:
+
+```bash
+docker compose up -d --no-deps --force-recreate wallet-api
+```
+
+Send `aa: true` to `/wallet-api/auth/account/web3/signed` for deployed ERC-1271 accounts.
+Omitting `aa` or sending `false` keeps EOA verification. An absent or empty RPC disables AA login.
+Undeployed accounts / ERC-6492 signatures are not supported.
